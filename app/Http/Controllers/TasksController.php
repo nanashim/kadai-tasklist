@@ -8,7 +8,7 @@ use App\Http\Requests;
 
 use App\Task;    // add
 
-class TasksController extends Controller
+class tasksController extends Controller
 {
     /**
      * Display a listing of the resource.
@@ -29,6 +29,7 @@ class TasksController extends Controller
      *
      * @return \Illuminate\Http\Response
      */
+     
     public function create()
     {
         $task = new Task;
@@ -46,13 +47,20 @@ class TasksController extends Controller
      */
     public function store(Request $request)
     {
+        $this->validate($request, [
+            'status' => 'required|max:10',   // add
+            'content' => 'required|max:191',
+        ]);
+
+
         $task = new Task;
+        $task->status = $request->status;    // add
         $task->content = $request->content;
         $task->save();
 
+
         return redirect('/');
     }
-
     /**
      * Display the specified resource.
      *
@@ -90,11 +98,19 @@ class TasksController extends Controller
      * @param  int  $id
      * @return \Illuminate\Http\Response
      */
-    public function update(Request $request, $id)
+     public function update(Request $request, $id)
     {
+        $this->validate($request, [
+            'status' => 'required|max: 10',   // add
+            'content' => 'required|max: 191',
+        ]);
+
+
         $task = Task::find($id);
+        $task->status = $request->status;    // add
         $task->content = $request->content;
         $task->save();
+
 
         return redirect('/');
     }
