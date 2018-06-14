@@ -17,12 +17,20 @@ class tasksController extends Controller
      */
     public function index()
     {
-        $tasks = Task::all();
+        $data = [];
+        if (\Auth::check()) {
+            $user = \Auth::user();
+            $tasks = $user->tasks()->orderBy('id')->paginate(1000);
 
-        return view('tasks.index', [
-            'tasks' => $tasks,
-        ]);
-    }
+            $data = [
+                'user' => $user,
+                'tasks' => $tasks,
+            ];
+            $data += $this->counts($user);
+            return view('users.show', $data);
+        }else {
+            return view('welcome');
+        }
 
     /**
      * Show the form for creating a new resource.
@@ -30,6 +38,7 @@ class tasksController extends Controller
      * @return \Illuminate\Http\Response
      */
      
+    
     public function create()
     {
         $task = new Task;
@@ -53,13 +62,13 @@ class tasksController extends Controller
         ]);
 
 
-        $task = new Task;
-        $task->status = $request->status;    // add
-        $task->content = $request->content;
-        $task->save();
+        $request->user()->tasks()->create([
+            'content' => $request->content,
+            'status' => $request->status,
+            
+        ]);
 
-
-        return redirect('/');
+        return redirect('tasks');
     }
     /**
      * Display the specified resource.
@@ -70,11 +79,14 @@ class tasksController extends Controller
     public function show($id)
     {
         $task = Task::find($id);
-
-        return view('tasks.show', [
+        
+        if (\Auth::user()->id === $task->user_id){
+            return view('tasks.show', [
             'task' => $task,
         ]);
-    }
+        } else {
+        return redirect('/');
+        }
 
     /**
      * Show the form for editing the specified resource.
@@ -121,11 +133,16 @@ class tasksController extends Controller
      * @param  int  $id
      * @return \Illuminate\Http\Response
      */
+    
     public function destroy($id)
     {
-        $task = Task::find($id);
-        $task->delete();
+        $task = \App\Task::find($id);
 
-        return redirect('/');
+        if (\Auth::id() === $task->user_id) {
+            $task->delete();
+        } else {
+        
+        return view('welcome');
+        }
     }
 }

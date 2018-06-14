@@ -26,5 +26,9 @@ Route::post('login', 'Auth\LoginController@login')->name('login.post');
 Route::get('logout', 'Auth\LoginController@logout')->name('logout.get');
 
 Route::get('/', function () {
-    return view('welcome');
+    return view('welcome');});
+    
+Route::group(['middleware' => 'auth'], function () {
+    // Route::resource('users', 'UsersController', ['only' => ['index', 'show']]);
+    Route::resource('tasks', 'TasksController');
 });
