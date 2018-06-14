@@ -8,7 +8,7 @@ use App\Http\Requests;
 
 use App\Task;    // add
 
-class tasksController extends Controller
+class TasksController extends Controller
 {
     /**
      * Display a listing of the resource.
@@ -26,11 +26,12 @@ class tasksController extends Controller
                 'user' => $user,
                 'tasks' => $tasks,
             ];
-            $data += $this->counts($user);
-            return view('users.show', $data);
+            // $data += $this->counts($user);
+            return view('tasks.index', $data);
         }else {
             return view('welcome');
         }
+    }
 
     /**
      * Show the form for creating a new resource.
@@ -68,7 +69,7 @@ class tasksController extends Controller
             
         ]);
 
-        return redirect('tasks');
+        return redirect('/tasks');
     }
     /**
      * Display the specified resource.
@@ -87,6 +88,7 @@ class tasksController extends Controller
         } else {
         return redirect('/');
         }
+    }
 
     /**
      * Show the form for editing the specified resource.
@@ -97,10 +99,13 @@ class tasksController extends Controller
     public function edit($id)
     {
         $task = Task::find($id);
-
-        return view('tasks.edit', [
+        
+        if (\Auth::user()->id === $task->user_id){
+            return view('tasks.edit', [
             'task' => $task,
         ]);
+        return redirect('/');
+    }
     }
 
     /**
@@ -138,8 +143,9 @@ class tasksController extends Controller
     {
         $task = \App\Task::find($id);
 
-        if (\Auth::id() === $task->user_id) {
+        if (\Auth::user()->id === $task->user_id) {
             $task->delete();
+        return redirect('/');
         } else {
         
         return view('welcome');
